@@ -1,0 +1,18 @@
+import pandas as pd
+import os
+
+#指定欲讀取的txt檔的路徑以及轉檔後存放csv的路徑
+directory_read = '/Users/howardtseng/Desktop/picocar_data'
+directory_save = '/Users/howardtseng/Desktop/picocar_data/csv'
+#利用for迴圈依序開檔案讀取
+for i in range(1, 51):
+    filename = f'dead_end_{i}.txt'
+    file_path = os.path.join(directory_read, filename)
+    df = pd.read_csv(file_path, sep=",", header=None)
+    #為每個columns命名
+    df.columns = ['Distance_front_1', 'Distance_side_1', 'Distance_front_2', 'Distance_side_2']
+    #label該組數據屬於哪種情況
+    df['Move'] = 'Dead End'
+    #儲存為csv檔
+    new_filename = filename.replace('.txt', '.csv')
+    df.to_csv(os.path.join(directory_save, new_filename), index=False)
