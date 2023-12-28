@@ -1,0 +1,24 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+import os
+
+#指定開啟csv的路徑
+directory = '/Users/howardtseng/Desktop/pico_car/picocar_data/csv'
+all_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.csv')]
+
+dataframes = []
+
+for file in all_files:
+    df = pd.read_csv(file)
+    dataframes.append(df)
+#將所有蒐集到的數據merge為一個dataframe
+combined_df = pd.concat(dataframes, ignore_index=True)
+#定義input的values以及output prediction，使用決策樹演算法
+X = combined_df[['Distance_front_1', 'Distance_side_1', 'Distance_front_2', 'Distance_side_2']]
+y = combined_df['Move']
+model = DecisionTreeClassifier()
+model.fit(X, y)
+#重新測試迷宮、讀取數據並預測下一步
+test_data = pd.DataFrame([[6, 5, 94, 6]], columns=['Distance_front_1', 'Distance_side_1', 'Distance_front_2', 'Distance_side_2'])
+prediction = model.predict(test_data)
+print(prediction)
