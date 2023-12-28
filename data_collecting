@@ -1,0 +1,48 @@
+from pico_car import pico_car, SSD1306_I2C, ultrasonic1, ultrasonic2
+from machine import Pin, I2C
+import time
+
+ultrasonic_front = ultrasonic1()
+ultrasonic_side = ultrasonic2()
+Motor = pico_car()
+i2c = I2C(1, scl=Pin(15), sda=Pin(14), freq=100000)
+oled = SSD1306_I2C(128, 32, i2c)
+
+#每種情況跑50次
+for test in range(1, 51):
+    distancef_data_1 = []
+    distances_data_1 = []
+    distancef_data_2 = []
+    distances_data_2 = []
+
+    while True:
+        Motor.Car_Run(80, 70)
+        distance_front = ultrasonic_front.Distance_accurate()
+
+        if distance_front < 6:
+            Motor.Car_Stop()
+            #紀錄第一組距離數據
+            distancef_data_1.append(ultrasonic_front.Distance_accurate())
+            distances_data_1.append(ultrasonic_side.Distance_accurate())
+            Motor.Car_Right(80, 70)
+            #time.sleep(1)
+            if ultrasonic_side.Distance_accurate() < 6:
+                Motor.Car_Stop()
+            #紀錄第二組距離數據
+                distancef_data_2.append(ultrasonic_front.Distance_accurate())
+                distances_data_2.append(ultrasonic_side.Distance_accurate())
+                break
+    
+    #將取得的數據寫入txt檔
+    filename = f'distance_data_{test}.txt'
+    with open(filename, 'w') as file:
+        for distancef1, distances1, distancef2, distances2 in zip(distancef_data_1, distances_data_1, distancef_data_2, distances_data_2):
+            file.write(f'{distancef1}, {distances1}, {distancef2}, {distances2}\n')
+    
+    #每次測試間隔3秒鐘讓我把車子放回原出發點
+    time.sleep(3)
+
+
+
+
+
